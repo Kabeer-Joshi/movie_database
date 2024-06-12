@@ -1,0 +1,88 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+*.pyo
+*.sqlite3
+*.env
+*.local_settings.py
+
+# If your project includes sensitive information or environment variables, add .env to the gitignore
+
+# Django migrations
+*/migrations/*
+
+# SQL database
+db.sqlite3
+*.db
+
+# Local development environments
+.env
+.venv
+venv/
+ENV/
+env/
+venv.bak/
+venv/
+ENV/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Python egg files
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Distribution / packaging
+.Python
+*.egg-info
+.installed.cfg
+*.egg
+
+# Virtualenv
+.venv/
+ENV/
+env/
+venv/
+env.bak/
+venv.bak/
+
+# Pytest
+.cache
+
+# MyPy
+.mypy_cache/
+
+# Coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# VS Code
+.vscode/
