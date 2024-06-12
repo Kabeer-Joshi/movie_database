@@ -9,7 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
         
 class ReviewSerializer(serializers.ModelSerializer):
     
-    reviewer = serializers.StringRelatedField(read_only=True)
+    reviewer = serializers.StringRelatedField(source="user.username" , read_only=True)
     class Meta:
         model = Review
         fields = '__all__'
