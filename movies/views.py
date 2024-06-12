@@ -24,9 +24,10 @@ def add_movie(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'  , 'PUT', 'DELETE'])
-def movie_detail(request , pk):
+def movie_detail(request):
+    movieId = request.data.get('id')
     try:
-        movie = Movie.objects.get(pk=pk)
+        movie = Movie.objects.get(pk=movieId)
         
         if request.method == 'GET':
             serializer = MovieSerializer(movie)
