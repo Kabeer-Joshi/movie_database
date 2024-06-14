@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Movie , Review
 from django.contrib.auth.models import User
+from django.db.models import Avg
 
 class RegistrationSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
@@ -43,6 +44,11 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class MovieSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(many=True, read_only=True)
+    avg_rating = serializers.SerializerMethodField()
     class Meta:
         model = Movie
         fields = '__all__'
+        
+    def get_avg_rating(self, obj):
+        avg = obj.reviews.aggregate(Avg('rating')).get('rating__avg')
+        return avg if avg is not None else 0

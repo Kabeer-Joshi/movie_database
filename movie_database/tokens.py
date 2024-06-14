@@ -8,5 +8,6 @@ class CustomRefreshToken(RefreshToken):
         # Add custom claims
         token['username'] = user.username
         token['email'] = user.email
+        token['is_staff'] = user.is_staff
 
         return token

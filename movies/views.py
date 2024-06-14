@@ -1,12 +1,6 @@
-from django.shortcuts import render
-
-# Create your views here.
-
 from rest_framework import status
 from rest_framework.decorators import api_view ,permission_classes
-
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated , AllowAny
+from rest_framework.permissions import IsAuthenticated , AllowAny , IsAdminUser
 from rest_framework.response import Response
 from .models import Movie , Review
 from .serializers import MovieSerializer , RegistrationSerializer , ReviewSerializer
@@ -49,6 +43,7 @@ def movie_list(request):
     return Response(serializer.data)
 
 @api_view(['POST'])
+@permission_classes([IsAdminUser])
 def add_movie(request):
     serializer = MovieSerializer(data=request.data)
     if serializer.is_valid():
@@ -67,6 +62,8 @@ def movie_detail(request):
             return Response(serializer.data)
         
         elif request.method == 'PUT':
+            if not request.user.is_staff:
+                return Response({'message': 'You are not allowed to edit this movie'}, status=403)
             serializer = MovieSerializer(movie , data=request.data)
             if serializer.is_valid():
                 serializer.save()
@@ -77,6 +74,7 @@ def movie_detail(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
+@permission_classes([IsAdminUser])  
 def movie_delete(request):
     movieId = request.data.get('id')
     try:
@@ -127,6 +125,8 @@ def edit_review(request):
     reviewId = request.data.get('reviewId')
     try:
         review = Review.objects.get(pk=reviewId)
+        if review.user != request.user:
+            return Response({'message': 'You are not allowed to edit this review'}, status=403) 
         serializer = ReviewSerializer(review , data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -141,6 +141,8 @@ def delete_review(request):
     reviewId = request.data.get('reviewId')
     try:
         review = Review.objects.get(pk=reviewId)
+        if review.user != request.user:
+            return Response({'message': 'You are not allowed to delete this review'}, status=403)
         review.delete()
         return Response(
             status=status.HTTP_204_NO_CONTENT
