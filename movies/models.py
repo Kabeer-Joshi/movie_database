@@ -16,6 +16,7 @@ class Movie(models.Model):
     description = models.TextField()
     release_year = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
+    imageUrl = models.URLField(null=True , blank=True)
 
     def __str__(self):
         return self.title

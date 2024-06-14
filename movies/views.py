@@ -53,13 +53,13 @@ def add_movie(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'  , 'PUT', 'DELETE'])
+@api_view(['POST'  , 'PUT'])
 def movie_detail(request):
     movieId = request.data.get('id')
     try:
         movie = Movie.objects.get(pk=movieId)
         
-        if request.method == 'GET':
+        if request.method == 'POST':
             serializer = MovieSerializer(movie)
             return Response(serializer.data)
         
@@ -70,10 +70,18 @@ def movie_detail(request):
                 return Response(serializer.data)
             return Response(serializer.errors , status=status.HTTP_400_BAD_REQUEST)
         
-        elif request.method == 'DELETE':
-            movie.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        
+    except Movie.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+def movie_delete(request):
+    movieId = request.data.get('id')
+    try:
+        movie = Movie.objects.get(pk=movieId)
+        movie.delete()
+        return Response(
+            status=status.HTTP_204_NO_CONTENT
+        )
     except Movie.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     
