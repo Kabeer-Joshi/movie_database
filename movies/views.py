@@ -38,6 +38,7 @@ def registration_view(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def movie_list(request):
+    print("Is this user a staff member? ", request.user.is_staff)
     movies = Movie.objects.all()
     serializer = MovieSerializer(movies, many=True)
     return Response(serializer.data)
