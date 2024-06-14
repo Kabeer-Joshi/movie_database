@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view ,permission_classes
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .models import Movie
+from .models import Movie , Review
 from .serializers import MovieSerializer , RegistrationSerializer , ReviewSerializer
 
 
@@ -91,16 +91,31 @@ def movie_delete(request):
 
 @api_view(['POST'])
 def create_review(request):
-    movieId = request.data.get('movieId')
+    # Get the movie
     try:
-        movie = Movie.objects.get(id=movieId)
-        print("i got movie as " , movie)
+        movie_id = request.data.get('movieId')
+        movie = Movie.objects.get(id=movie_id)
     except Movie.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    serializer = ReviewSerializer(data=request.data)
-    print(serializer)
+        return Response({'error': 'Movie not found'}, status=404)
+
+    # Get the user from the request
+    user = request.user
+    
+    # Check if the user has already reviewed this movie
+    if Review.objects.filter(movie=movie, user=user).exists():
+        return Response({'message': 'You have already reviewed this movie'}, status=400)
+
+    # Create a new review
+    review = Review(movie=movie, user=user)
+
+    # Serialize the data
+    serializer = ReviewSerializer(review, data=request.data)
+
+    # Validate and save the data
     if serializer.is_valid():
-        serializer.save(user=request.user, movie=movie)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(serializer.data, status=201)
+    else:
+        return Response(serializer.errors, status=400)
+
     

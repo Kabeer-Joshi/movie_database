@@ -28,14 +28,18 @@ class RegistrationSerializer(serializers.ModelSerializer):
         account.save()
 
         return account
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email']
         
 class ReviewSerializer(serializers.ModelSerializer):
-    reviewer = serializers.StringRelatedField(source="user.username" , read_only=True)
+    user = serializers.StringRelatedField()
+
     class Meta:
         model = Review
-        exclude=['user']
-        
-        
+        fields = ['id', 'user', 'rating', 'comment', 'created_at']
 
 class MovieSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(many=True, read_only=True)

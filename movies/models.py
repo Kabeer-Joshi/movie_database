@@ -24,14 +24,13 @@ class Movie(models.Model):
     
 class Review(models.Model):
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE , related_name='reviews')
-    user = models.OneToOneField(User, on_delete=models.CASCADE , related_name='reviewer')
+    user = models.ForeignKey(User, on_delete=models.CASCADE , related_name='reviewer')
     rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)]
     )
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     
-    # this is to ensure that a user can only review a movie once
     class Meta:
         unique_together = ('movie', 'user')
 
