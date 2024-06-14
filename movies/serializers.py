@@ -34,7 +34,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     reviewer = serializers.StringRelatedField(source="user.username" , read_only=True)
     class Meta:
         model = Review
-        fields = '__all__'
+        exclude=['user']
         
         
 

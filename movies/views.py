@@ -8,7 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Movie
-from .serializers import MovieSerializer , RegistrationSerializer
+from .serializers import MovieSerializer , RegistrationSerializer , ReviewSerializer
 
 
 @api_view(['POST',])
@@ -84,4 +84,23 @@ def movie_delete(request):
         )
     except Movie.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    
+    
+# REVIEWS 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_review(request):
+    movieId = request.data.get('movieId')
+    try:
+        movie = Movie.objects.get(pk=movieId)
+    except Movie.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    serializer = ReviewSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        serializer.save(user=request.user, movie=movie)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
