@@ -30,7 +30,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return account
         
 class ReviewSerializer(serializers.ModelSerializer):
-    
     reviewer = serializers.StringRelatedField(source="user.username" , read_only=True)
     class Meta:
         model = Review
@@ -39,7 +38,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         
 
 class MovieSerializer(serializers.ModelSerializer):
-    
     reviews = ReviewSerializer(many=True, read_only=True)
     class Meta:
         model = Movie

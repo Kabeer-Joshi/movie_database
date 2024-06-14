@@ -90,15 +90,15 @@ def movie_delete(request):
 # REVIEWS 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def create_review(request):
     movieId = request.data.get('movieId')
     try:
-        movie = Movie.objects.get(pk=movieId)
+        movie = Movie.objects.get(id=movieId)
+        print("i got movie as " , movie)
     except Movie.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     serializer = ReviewSerializer(data=request.data)
-    
+    print(serializer)
     if serializer.is_valid():
         serializer.save(user=request.user, movie=movie)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
