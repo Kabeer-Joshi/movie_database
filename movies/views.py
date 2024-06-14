@@ -4,14 +4,16 @@ from django.shortcuts import render
 
 from rest_framework import status
 from rest_framework.decorators import api_view ,permission_classes
+
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated , AllowAny
 from rest_framework.response import Response
 from .models import Movie , Review
 from .serializers import MovieSerializer , RegistrationSerializer , ReviewSerializer
 
 
 @api_view(['POST',])
+@permission_classes((AllowAny,))
 def registration_view(request):
 
     if request.method == 'POST':
