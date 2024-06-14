@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated , AllowAny
 from rest_framework.response import Response
 from .models import Movie , Review
 from .serializers import MovieSerializer , RegistrationSerializer , ReviewSerializer
+from movie_database.tokens import CustomRefreshToken
 
 
 @api_view(['POST',])
@@ -28,7 +29,7 @@ def registration_view(request):
             data['username'] = account.username
             data['email'] = account.email
 
-            refresh = RefreshToken.for_user(account)
+            refresh = CustomRefreshToken.for_user(account)  # use the custom token class
             data['token'] = {
                                 'refresh': str(refresh),
                                 'access': str(refresh.access_token),
@@ -119,5 +120,31 @@ def create_review(request):
         return Response(serializer.data, status=201)
     else:
         return Response(serializer.errors, status=400)
-
+    
+    
+@api_view(['POST'])
+def edit_review(request):
+    reviewId = request.data.get('reviewId')
+    try:
+        review = Review.objects.get(pk=reviewId)
+        serializer = ReviewSerializer(review , data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors , status=status.HTTP_400_BAD_REQUEST)
+    except Review.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    
+@api_view(['POST'])
+def delete_review(request):
+    reviewId = request.data.get('reviewId')
+    try:
+        review = Review.objects.get(pk=reviewId)
+        review.delete()
+        return Response(
+            status=status.HTTP_204_NO_CONTENT
+        )
+    except Review.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
     
