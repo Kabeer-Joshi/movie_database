@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from .models import Movie , Review , Watchlist
 from .serializers import MovieSerializer , RegistrationSerializer , ReviewSerializer  , WatchlistSerializer
 from movie_database.tokens import CustomRefreshToken
+from .filter import MovieFilter
 
 
 @api_view(['POST',])
@@ -39,7 +40,8 @@ def registration_view(request):
 @permission_classes([IsAuthenticated])
 def movie_list(request):
     movies = Movie.objects.all()
-    serializer = MovieSerializer(movies, many=True , context={'request': request})
+    movie_filter = MovieFilter(request.GET , queryset = movies)
+    serializer = MovieSerializer(movie_filter.qs, many=True , context={'request': request})
     return Response(serializer.data)
 
 @api_view(['POST'])
