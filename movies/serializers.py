@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Movie , Review
+from .models import Movie , Review , Watchlist
 from django.contrib.auth.models import User
 from django.db.models import Avg
 
@@ -45,6 +45,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 class MovieSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(many=True, read_only=True)
     avg_rating = serializers.SerializerMethodField()
+    is_watchlisted = serializers.SerializerMethodField()
     class Meta:
         model = Movie
         fields = '__all__'
@@ -52,3 +53,13 @@ class MovieSerializer(serializers.ModelSerializer):
     def get_avg_rating(self, obj):
         avg = obj.reviews.aggregate(Avg('rating')).get('rating__avg')
         return avg if avg is not None else 0
+    
+    def get_is_watchlisted(self, obj):
+        
+        user = self.context['request'].user
+        return Watchlist.objects.filter(user=user, movie=obj).exists()
+
+class WatchlistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Watchlist
+        fields = ['id', 'user', 'movie', 'added_at']

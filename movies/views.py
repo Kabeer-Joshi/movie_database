@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view ,permission_classes
 from rest_framework.permissions import IsAuthenticated , AllowAny , IsAdminUser
 from rest_framework.response import Response
-from .models import Movie , Review
-from .serializers import MovieSerializer , RegistrationSerializer , ReviewSerializer
+from .models import Movie , Review , Watchlist
+from .serializers import MovieSerializer , RegistrationSerializer , ReviewSerializer  , WatchlistSerializer
 from movie_database.tokens import CustomRefreshToken
 
 
@@ -38,15 +38,14 @@ def registration_view(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def movie_list(request):
-    print("Is this user a staff member? ", request.user.is_staff)
     movies = Movie.objects.all()
-    serializer = MovieSerializer(movies, many=True)
+    serializer = MovieSerializer(movies, many=True , context={'request': request})
     return Response(serializer.data)
 
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def add_movie(request):
-    serializer = MovieSerializer(data=request.data)
+    serializer = MovieSerializer(data=request.data , context={'request': request})
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -59,13 +58,13 @@ def movie_detail(request):
         movie = Movie.objects.get(pk=movieId)
         
         if request.method == 'POST':
-            serializer = MovieSerializer(movie)
+            serializer = MovieSerializer(movie , context={'request': request})
             return Response(serializer.data)
         
         elif request.method == 'PUT':
             if not request.user.is_staff:
                 return Response({'message': 'You are not allowed to edit this movie'}, status=403)
-            serializer = MovieSerializer(movie , data=request.data)
+            serializer = MovieSerializer(movie , data=request.data , context={'request': request})
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
@@ -150,4 +149,35 @@ def delete_review(request):
         )
     except Review.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    
+
+
+#WATCHLIST 
+@api_view(['POST'])
+def add_to_watchlist(request):
+    movie_id = request.data.get('movieId')
+    user = request.user
+    movie = Movie.objects.get(id=movie_id)
+    watchlist, created = Watchlist.objects.get_or_create(user=user, movie=movie)
+
+    if created:
+        serializer = WatchlistSerializer(watchlist)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        return Response({'message': 'Movie is already in watchlist'}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def remove_from_watchlist(request):
+    movie_id = request.data.get('movieId')
+    user = request.user
+    movie = Movie.objects.get(id=movie_id)
+    watchlist = Watchlist.objects.filter(user=user, movie=movie)
+
+    if watchlist.exists():
+        watchlist.delete()
+        return Response({'message': 'Movie removed from watchlist'}, status=status.HTTP_204_NO_CONTENT)
+    else:
+        return Response({'message': 'Movie not found in watchlist'}, status=status.HTTP_404_NOT_FOUND)
+
     

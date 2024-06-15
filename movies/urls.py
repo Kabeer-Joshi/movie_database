@@ -9,4 +9,6 @@ urlpatterns = [
     path('movies/review/create-review/',views.create_review , name='create_review'),
     path('movies/review/edit-review/',views.edit_review , name='edit_review'),
     path('movies/review/delete-review/',views.delete_review , name='delete_review'),
+    path('movies/watchlist/',views.add_to_watchlist , name='add-to-watchlist'),
+    path('movies/watchlist/remove/',views.remove_from_watchlist , name='remove-from-watchlist'),
 ]
