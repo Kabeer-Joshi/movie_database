@@ -6,6 +6,7 @@ from .models import Movie , Review , Watchlist
 from .serializers import MovieSerializer , RegistrationSerializer , ReviewSerializer  , WatchlistSerializer
 from movie_database.tokens import CustomRefreshToken
 from .filter import MovieFilter
+from rest_framework.pagination import PageNumberPagination
 
 
 @api_view(['POST',])
@@ -39,10 +40,13 @@ def registration_view(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def movie_list(request):
+    paginator = PageNumberPagination()  
+    paginator.page_size = 6
     movies = Movie.objects.all()
     movie_filter = MovieFilter(request.GET , queryset = movies)
-    serializer = MovieSerializer(movie_filter.qs, many=True , context={'request': request})
-    return Response(serializer.data)
+    result_page = paginator.paginate_queryset(movie_filter.qs, request)
+    serializer = MovieSerializer(result_page, many=True , context={'request': request})
+    return paginator.get_paginated_response(serializer.data)
 
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
