@@ -36,6 +36,7 @@ CORS_ALLOW_CREDENTIALS = True
 INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
+    'drf_yasg',
     'movies',
     'django_filters',
     'django.contrib.admin',
