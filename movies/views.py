@@ -7,6 +7,7 @@ from .serializers import MovieSerializer , RegistrationSerializer , ReviewSerial
 from movie_database.tokens import CustomRefreshToken
 from .filter import MovieFilter
 from rest_framework.pagination import PageNumberPagination
+from django.db.models import Avg
 
 
 @api_view(['POST',])
@@ -43,10 +44,25 @@ def movie_list(request):
     paginator = PageNumberPagination()  
     paginator.page_size = 6
     movies = Movie.objects.all()
+    
+    # Annotate with average rating , because avg_rating is not a field in the model , and i can use it for ordering.
+    movies = movies.annotate(avg_rating=Avg('reviews__rating'))
+    
+    # Apply filters
     movie_filter = MovieFilter(request.GET , queryset = movies)
-    result_page = paginator.paginate_queryset(movie_filter.qs, request)
+    filtered_qs = movie_filter.qs
+    
+    # Get ordering parameter from the request
+    ordering = request.query_params.get('ordering' , None)
+    if ordering:
+        filtered_qs = filtered_qs.order_by(ordering)
+        
+    # Apply pagination
+    result_page = paginator.paginate_queryset(filtered_qs, request)
+    
     serializer = MovieSerializer(result_page, many=True , context={'request': request})
     return paginator.get_paginated_response(serializer.data)
+
 
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
